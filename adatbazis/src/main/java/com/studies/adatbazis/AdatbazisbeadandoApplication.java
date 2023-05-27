@@ -1,6 +1,6 @@
 package com.studies.adatbazis;
 
-import com.mongodb.client.model.Filters;
+import com.mongodb.client.MongoCollection;
 import com.studies.adatbazis.CompanyCar.CompanyCar;
 import com.studies.adatbazis.CompanyCar.CompanyCarManufacturer;
 import com.studies.adatbazis.CompanyCar.CompanyCarRepository;
@@ -15,6 +15,7 @@ import com.studies.adatbazis.Employee.EmployeeRepository;
 import com.studies.adatbazis.Employee.Name;
 import com.studies.adatbazis.Project.Project;
 import com.studies.adatbazis.Project.ProjectRepository;
+import org.bson.Document;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -25,10 +26,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @SpringBootApplication
 public class AdatbazisbeadandoApplication {
@@ -53,26 +52,51 @@ public class AdatbazisbeadandoApplication {
 					projectRepository,
 					mongoTemplate);
 
+			Employee john = employeeRepository.findById(1);
+			System.out.println("Object john data: " + john);
+
+			List<Employee> employeeList = employeeRepository.findByLastName("Connor");
+			for (Employee employee : employeeList) {
+				System.out.println("Object employee data: " + employee);
+			}
+
+			Employee arnold = new Employee(
+					4,
+					new Name("a rno Ld ", " schwa rzene GGER"),
+					new Address("Germany", "Waldorf", 56789),
+					4);
+			try {
+				employeeRepository.insert(arnold);
+				System.out.println("Inserted Employee with ID: " + arnold.getId());
+			} catch (DuplicateKeyException duplicateKeyException) {
+				System.out.println("Employee duplicate key exception occurred: " + duplicateKeyException.getCause().getMessage());
+			}
+
+			mongoTemplate.updateMulti(new Query(Criteria.where("budget").gt(4000)), new Update().inc("budget", +1000), Project.class);
+
+			mongoTemplate.findAndRemove(new Query(Criteria.where("budget").gt(10000)), Project.class);
+
+			MongoCollection<Document> employee = mongoTemplate.getCollection("employee");
+
 //			System.out.println("Lastnames: " + employeeRepository.findByLastName("Connor"));
-			System.out.println("projectIds: " + employeeRepository.findByProjectId(1));
-			System.out.println("projectIdLists: " + employeeRepository.findByProjectId(List.of(1, 2)));
-			System.out.println("findByCompanyPcId1: " + employeeRepository.findByCompanyPcId(1));
-			for (Employee employee : employeeRepository.findByLastName("Connor")) {
-				System.out.println(employee);
-			}
+//			System.out.println("projectIds: " + employeeRepository.findByProjectId(1));
+//			System.out.println("projectIdLists: " + employeeRepository.findByProjectId(List.of(1, 2)));
+//			System.out.println("findByCompanyPcId1: " + employeeRepository.findByCompanyPcId(1));
+//			for (Employee employee : employeeRepository.findByLastName("Connor")) {
+//				System.out.println(employee);
+//			}
 //			System.out.println("findByLastName: " + employeeRepository.findByLastName("Connor"));
-			System.out.println("findByFirstName: " + employeeRepository.findByFirstName("John"));
-			Query queryProjectBudget = new Query(Criteria.where("budget").gt(4000));
-			Project projectList = mongoTemplate.findById(1, Project.class);
-			mongoTemplate.updateMulti(queryProjectBudget, new Update().inc("budget", +1000), Project.class);
-			for (Employee employee : employeeRepository.findByName(new Name("John", "Connor"))) {
-				System.out.println(employee);
-			}
-			for (Project project : projectRepository.findByEmployeeId(1)) {
-				System.out.println(project);
-			}
-			System.out.println("findByLocation: " + departmentRepository.findByLocation("Miskolc"));
-			System.out.println("findByEmployeeId: " + departmentRepository.findByEmployeeId(4));
+//			System.out.println("findByFirstName: " + employeeRepository.findByFirstName("John"));
+//			Query queryProjectBudget = new Query(Criteria.where("budget").gt(4000));
+//			Project projectList = mongoTemplate.findById(1, Project.class);
+//			for (Employee employee : employeeRepository.findByName(new Name("John", "Connor"))) {
+//				System.out.println(employee);
+//			}
+//			for (Project project : projectRepository.findByEmployeeId(1)) {
+//				System.out.println(project);
+//			}
+//			System.out.println("findByLocation: " + departmentRepository.findByLocation("Miskolc"));
+//			System.out.println("findByEmployeeId: " + departmentRepository.findByEmployeeId(4));
 //			mongoTemplate.findAndRemove(new Query(Criteria.where("budget").gt(4000)), Project.class);
 		};
 	}
@@ -153,13 +177,8 @@ public class AdatbazisbeadandoApplication {
 				new Address("Hungary", "Eger", 3300),
 				companyPc3.getId());
 		arthur.setCompanyCarId(opel.getId());
-		Employee arnold = new Employee(
-				4,
-				new Name("a rno Ld ", " schwa rzene GGER"),
-				new Address("Germany", "Waldorf", 56789),
-				companyPc4.getId());
 
-		List<Employee> employeeList = List.of(john, sarah, arthur, arnold);
+		List<Employee> employeeList = List.of(john, sarah, arthur);
 
 		try {
 			employeeRepository.insert(employeeList);
@@ -188,17 +207,14 @@ public class AdatbazisbeadandoApplication {
 			System.out.println("Project exception occurred: " + duplicateKeyException.getCause().getMessage());
 		}
 
-		Query updateJohnQuery = new Query();
-		updateJohnQuery.addCriteria(Criteria.where("id").is(john.getId()));
 		john.setProjectId(List.of(spring.getId(), mongodb.getId()));
-		mongoTemplate.updateFirst(updateJohnQuery, Update.update("projectId", List.of(spring.getId(), mongodb.getId())), Employee.class);
-//		employeeRepository.findById(4).
+		mongoTemplate.updateFirst(new Query(Criteria.where("id").is(john.getId())), Update.update("projectId", List.of(spring.getId(), mongodb.getId())), Employee.class);
 
 		Department development = new Department(
 				1,
 				"Development",
 				List.of("Budapest", "Waldorf"),
-				List.of(john.getId(), arnold.getId()),
+				List.of(john.getId()),
 				List.of(spring.getId(), mongodb.getId()));
 		Department support = new Department(
 				2,
