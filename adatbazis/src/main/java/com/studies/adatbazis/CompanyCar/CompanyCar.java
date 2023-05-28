@@ -2,13 +2,11 @@ package com.studies.adatbazis.CompanyCar;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @Document
-//@CompoundIndex(def = "{'id': 1, 'licensePlate': 1}", unique = true)
 public class CompanyCar {
     @Id
     private Integer id;

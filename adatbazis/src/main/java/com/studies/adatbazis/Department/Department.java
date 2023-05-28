@@ -10,7 +10,6 @@ import java.util.List;
 
 @Data
 @Document
-//@CompoundIndex(def = "{'id': 1, 'name': 1}", unique = true)
 public class Department {
     @Id
     private Integer id;

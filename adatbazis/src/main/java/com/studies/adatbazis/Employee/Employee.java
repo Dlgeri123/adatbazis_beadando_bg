@@ -2,7 +2,6 @@ package com.studies.adatbazis.Employee;
 
 import lombok.Data;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -10,7 +9,6 @@ import java.util.List;
 
 @Data
 @Document
-//@CompoundIndex(def = "{'id': 1, 'companyCarId': 1, 'companyPcId': 1}", unique = true)
 public class Employee {
     @Id
     private Integer id;
@@ -25,7 +23,7 @@ public class Employee {
     public Employee(Integer id, Name name, Address address, Integer companyPcId) {
         if (id == null || id <= 0)
             throw new IllegalStateException("Add a employee id");
-        if (name == null)
+        if (name == null || name.getFirstName() == "" || name.getLastName() == "")
             throw new IllegalStateException("Add an employee name");
         if (address == null)
             throw new IllegalStateException("Add an employee address");

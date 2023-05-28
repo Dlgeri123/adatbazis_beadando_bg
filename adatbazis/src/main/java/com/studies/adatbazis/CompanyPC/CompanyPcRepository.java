@@ -5,7 +5,6 @@ import org.springframework.data.mongodb.repository.Query;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public interface CompanyPcRepository extends MongoRepository<CompanyPc, String> {
     CompanyPc findById(Integer id);

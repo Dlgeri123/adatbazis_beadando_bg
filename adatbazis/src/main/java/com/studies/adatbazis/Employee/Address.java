@@ -2,8 +2,6 @@ package com.studies.adatbazis.Employee;
 
 import lombok.Data;
 
-import java.util.Date;
-
 @Data
 public class Address {
     private String country;

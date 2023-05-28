@@ -1,7 +1,6 @@
 package com.studies.adatbazis.CompanyPC;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public class CompanyPcManufacturer {
     private String manufacturer;
