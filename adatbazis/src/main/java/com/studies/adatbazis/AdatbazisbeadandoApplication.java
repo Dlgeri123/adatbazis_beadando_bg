@@ -54,20 +54,24 @@ public class AdatbazisbeadandoApplication {
 
 			//Write your code here
 
+			// Get 1 employee where the id is 1
 			Employee john = employeeRepository.findById(1);
 			System.out.println("Object john data: " + john);
 
+			// Get all employees where the last name is "Connor"
 			List<Employee> employeeList = employeeRepository.findByLastName("Connor");
 			for (Employee employee : employeeList) {
 				System.out.println("Object employee data: " + employee);
 			}
 
+			// Initialize the object
 			Employee arnold = new Employee(
 					4,
 					new Name("a rno Ld ", " schwa rzene GGER"),
 					new Address("Germany", "Waldorf", 56789),
 					4);
 			arnold.setProjectId(List.of(1,2));
+			// Recommended to use try-catch block to handle duplicate key exception
 			try {
 				employeeRepository.insert(arnold);
 				System.out.println("Inserted Employee with ID: " + arnold.getId());
@@ -75,20 +79,27 @@ public class AdatbazisbeadandoApplication {
 				System.out.println("Employee duplicate key exception occurred: " + duplicateKeyException.getCause().getMessage());
 			}
 
+			// Updates the arnold object projectId property in the DB by adding the list of the query parameter projectId
 			mongoTemplate.updateFirst(new Query(Criteria.where("id").is(arnold.getId())), Update.update("projectId", employeeRepository.findById(1).getProjectId()), Employee.class);
 
+			// Increments the budget property by 1000 for all Project objects, where the budget is greater than 4000
 			mongoTemplate.updateMulti(new Query(Criteria.where("budget").gt(4000)), new Update().inc("budget", 1000), Project.class);
 
+			// Adds an Integer list of employeeIds, where the employeeId is not null
 			mongoTemplate.updateMulti(new Query(Criteria.where("id").ne(null)), Update.update("employeeId", List.of(1,4)), Project.class);
 
-//			mongoTemplate.findAndRemove(new Query(Criteria.where("budget").gt(10000)), Project.class);
+			// Remove those Project objects, where the budget is greater than 10000
+			mongoTemplate.findAndRemove(new Query(Criteria.where("budget").gt(10000)), Project.class);
 
+			// Get the full collection of "employee" objects
 			MongoCollection<Document> employeeDocument = mongoTemplate.getCollection("employee");
 			for (Document document : employeeDocument.find()) {
 				System.out.println("employeeDocument: " + document.toString());
 			}
 
-			List<Project> test = projectRepository.findByEmployeeId(1);
+			// Get those project where the employeeId is 1 is present
+			List<Project> projectList = projectRepository.findByEmployeeId(1);
+
 			//Write your code here
 		};
 	}
